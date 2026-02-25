@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grand Final — Finalists · Pack 425</title>
+  <!-- Firebase v9 compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: #0a1628;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px 12px;
+      gap: 12px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      flex-shrink: 0;
+    }
+    header h1 {
+      font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #FFD700;
+      text-shadow: 0 0 32px rgba(255,215,0,0.45);
+      line-height: 1;
+    }
+    header p {
+      font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+      color: #8aafd4;
+      margin-top: 4px;
+      letter-spacing: 2px;
+    }
+
+    /* ── Corner logos ── */
+    .corner-logo {
+      position: fixed;
+      top: 12px;
+      height: clamp(48px, 6vw, 72px);
+      width: auto;
+      z-index: 100;
+      object-fit: contain;
+    }
+    #logo-left  { left: 16px; }
+    #logo-right { right: clamp(80px, 8vw, 110px); }
+
+    /* ── Edit mode toggle ── */
+    #edit-btn {
+      position: fixed;
+      top: 14px;
+      right: 16px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #8aafd4;
+      font-size: 0.8rem;
+      font-family: inherit;
+      letter-spacing: 1px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+    #edit-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
+    #edit-btn.active { background: #FFD700; color: #0a1628; border-color: #FFD700; font-weight: 700; }
+
+    /* ── Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .grid .den-card:nth-child(5) { grid-column: 1; }
+    .grid .den-card:nth-child(6) { grid-column: 2; }
+    .grid .den-card:nth-child(7) { grid-column: 3; }
+
+    /* ── Den card ── */
+    .den-card {
+      background: #0e1f3a;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+    }
+
+    .den-header {
+      padding: 12px 18px;
+      font-size: clamp(1rem, 1.8vw, 1.45rem);
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .den-body {
+      padding: 14px 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    /* ── Racer row ── */
+    .racer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 12px 16px;
+      flex: 1;
+      transition: background 0.2s;
+    }
+
+    .medal {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    /* ── Car number badge ── */
+    .car-badge {
+      display: flex;
+      align-items: baseline;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 8px;
+      padding: 4px 8px 4px 6px;
+      flex-shrink: 0;
+      min-width: 48px;
+      justify-content: center;
+    }
+
+    .car-hash {
+      font-size: clamp(0.75rem, 1.2vw, 1rem);
+      font-weight: 700;
+      color: #6a8fb8;
+      line-height: 1;
+    }
+
+    .car-num {
+      font-size: clamp(1.1rem, 1.9vw, 1.6rem);
+      font-weight: 800;
+      color: #e8f0fe;
+      outline: none;
+      border-radius: 4px;
+      min-width: 22px;
+      text-align: center;
+      line-height: 1;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    .car-num:empty::before {
+      content: attr(data-placeholder);
+      color: #2e4560;
+    }
+
+    body.edit-mode .car-num:focus {
+      background: rgba(255,255,255,0.1);
+      box-shadow: 0 0 0 2px rgba(255,215,0,0.5);
+      padding: 2px 4px;
+    }
+
+    .racer-info { flex: 1; min-width: 0; }
+
+    /* ── Editable fields ── */
+    .racer-name,
+    .racer-time {
+      outline: none;
+      border-radius: 6px;
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    .racer-name {
+      display: block;
+      font-size: clamp(1.1rem, 2vw, 1.75rem);
+      font-weight: 700;
+      color: #e8f0fe;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
+      min-width: 60px;
+    }
+
+    .racer-time {
+      font-size: clamp(1.2rem, 2.2vw, 2rem);
+      font-weight: 800;
+      color: #64ffda;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 1px;
+      text-align: right;
+      min-width: 70px;
+    }
+
+    /* Placeholder via CSS :empty */
+    .racer-name:empty::before {
+      content: attr(data-placeholder);
+      color: #2e4560;
+      font-style: italic;
+      font-weight: 400;
+    }
+    .racer-time:empty::before {
+      content: attr(data-placeholder);
+      color: #1a3050;
+      font-style: normal;
+    }
+
+    /* Edit mode — fields are editable */
+    body.edit-mode .racer-name,
+    body.edit-mode .racer-time,
+    body.edit-mode .car-num {
+      cursor: text;
+    }
+    body.edit-mode .racer:hover {
+      background: rgba(255,255,255,0.09);
+    }
+    body.edit-mode .racer-name:focus,
+    body.edit-mode .racer-time:focus {
+      background: rgba(255,255,255,0.1);
+      box-shadow: 0 0 0 2px rgba(255,215,0,0.5);
+      padding: 2px 6px;
+      text-overflow: clip;
+    }
+
+    /* ── Fastest badge ── */
+    .racer.fastest {
+      background: rgba(255, 215, 0, 0.08);
+      box-shadow: inset 0 0 0 1.5px rgba(255,215,0,0.35);
+    }
+    .racer.fastest .racer-time {
+      color: #FFD700;
+      text-shadow: 0 0 12px rgba(255,215,0,0.6);
+    }
+    .fastest-badge {
+      display: none;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #FFD700;
+      margin-top: 2px;
+    }
+    .racer.fastest .fastest-badge { display: block; }
+
+    /* ── Toast notification ── */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: rgba(255,215,0,0.15);
+      border: 1px solid rgba(255,215,0,0.3);
+      color: #FFD700;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      letter-spacing: 1px;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      flex-shrink: 0;
+      font-size: 0.78rem;
+      color: #2a4060;
+      letter-spacing: 1px;
+    }
+
+    /* ── QR code block (8th grid cell) ── */
+    #qr-block {
+      background: #0e1f3a;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+      border-left: 5px solid #2a4a78;
+    }
+
+    #qr-block .den-header {
+      background: #0d1e38;
+      color: #4a7ab8;
+    }
+
+    #qr-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      gap: 10px;
+    }
+
+    #qr-box {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      background: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 10px;
+    }
+
+    #qr-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    /* Hide placeholder grid once real QR image is present */
+    #qr-img[src]:not([src=""]) ~ #qr-placeholder-grid {
+      display: none;
+    }
+
+    #qr-placeholder-grid {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      gap: 4px;
+    }
+    #qr-placeholder-grid span {
+      background: #1a1a1a;
+      border-radius: 2px;
+    }
+    #qr-placeholder-grid span.w { background: transparent; }
+
+    #qr-label {
+      font-size: clamp(0.7rem, 1.1vw, 0.9rem);
+      color: #4a6fa0;
+      letter-spacing: 0.5px;
+      text-align: center;
+      line-height: 1.4;
+      flex-shrink: 0;
+    }
+
+    /* ── Official BSA Cub Scout den colors ── */
+    .lions   .den-header { background: #FFC72C; color: #1a1a1a; }
+    .tigers  .den-header { background: #E87722; color: #fff; }
+    .wolves1 .den-header { background: #C8102E; color: #fff; }
+    .wolves2 .den-header { background: #a00d24; color: #fff; }
+    .bears   .den-header { background: #0077C8; color: #fff; }
+    .webelos .den-header { background: #00843D; color: #fff; }
+    .aols    .den-header { background: #003F87; color: #FFC72C; }
+
+    .lions   { border-left: 5px solid #FFC72C; }
+    .tigers  { border-left: 5px solid #E87722; }
+    .wolves1 { border-left: 5px solid #C8102E; }
+    .wolves2 { border-left: 5px solid #a00d24; }
+    .bears   { border-left: 5px solid #0077C8; }
+    .webelos { border-left: 5px solid #00843D; }
+    .aols    { border-left: 5px solid #003F87; }
+
+  </style>
+</head>
+<body>
+
+  <img id="logo-left"  class="corner-logo" src="assets/cubscouts200.png"           alt="Cub Scouts" />
+  <img id="logo-right" class="corner-logo" src="assets/Chief Seattle Council BSA.png" alt="Chief Seattle Council BSA" />
+  <button id="edit-btn" title="Toggle edit mode (E)">✏️ Edit</button>
+  <div id="toast"></div>
+
+  <header>
+    <h1>🏁 Grand Final &mdash; Finalists</h1>
+    <p>Pinewood Derby &nbsp;·&nbsp; Pack 425 &nbsp;·&nbsp; 2026</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- Lions -->
+    <div class="den-card lions">
+      <div class="den-header">🦁 Lions <span style="font-size:0.7em;opacity:0.75;font-weight:500">(K)</span></div>
+      <div class="den-body">
+        <div class="racer" data-racer="lions-1">
+          <span class="medal">🥇</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="lions-1-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="lions-1-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="lions-1-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="lions-2">
+          <span class="medal">🥈</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="lions-2-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="lions-2-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="lions-2-time" data-placeholder="0.000s"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tigers -->
+    <div class="den-card tigers">
+      <div class="den-header">🐯 Tigers <span style="font-size:0.7em;opacity:0.75;font-weight:500">(1st)</span></div>
+      <div class="den-body">
+        <div class="racer" data-racer="tigers-1">
+          <span class="medal">🥇</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="tigers-1-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="tigers-1-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="tigers-1-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="tigers-2">
+          <span class="medal">🥈</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="tigers-2-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="tigers-2-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="tigers-2-time" data-placeholder="0.000s"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wolves Group 1 -->
+    <div class="den-card wolves1">
+      <div class="den-header">🐺 Wolves · Grp 1 <span style="font-size:0.7em;opacity:0.75;font-weight:500">(2nd)</span></div>
+      <div class="den-body">
+        <div class="racer" data-racer="wolves1-1">
+          <span class="medal">🥇</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="wolves1-1-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="wolves1-1-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="wolves1-1-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="wolves1-2">
+          <span class="medal">🥈</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="wolves1-2-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="wolves1-2-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="wolves1-2-time" data-placeholder="0.000s"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wolves Group 2 -->
+    <div class="den-card wolves2">
+      <div class="den-header">🐺 Wolves · Grp 2 <span style="font-size:0.7em;opacity:0.75;font-weight:500">(2nd)</span></div>
+      <div class="den-body">
+        <div class="racer" data-racer="wolves2-1">
+          <span class="medal">🥇</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="wolves2-1-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="wolves2-1-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="wolves2-1-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="wolves2-2">
+          <span class="medal">🥈</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="wolves2-2-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="wolves2-2-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="wolves2-2-time" data-placeholder="0.000s"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bears -->
+    <div class="den-card bears">
+      <div class="den-header">🐻 Bears <span style="font-size:0.7em;opacity:0.75;font-weight:500">(3rd)</span></div>
+      <div class="den-body">
+        <div class="racer" data-racer="bears-1">
+          <span class="medal">🥇</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="bears-1-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="bears-1-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="bears-1-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="bears-2">
+          <span class="medal">🥈</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="bears-2-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="bears-2-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="bears-2-time" data-placeholder="0.000s"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Webelos -->
+    <div class="den-card webelos">
+      <div class="den-header">⚜️ Webelos <span style="font-size:0.7em;opacity:0.75;font-weight:500">(4th)</span></div>
+      <div class="den-body">
+        <div class="racer" data-racer="webelos-1">
+          <span class="medal">🥇</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="webelos-1-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="webelos-1-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="webelos-1-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="webelos-2">
+          <span class="medal">🥈</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="webelos-2-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="webelos-2-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="webelos-2-time" data-placeholder="0.000s"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AOL -->
+    <div class="den-card aols">
+      <div class="den-header">🏹 Arrow of Light <span style="font-size:0.7em;opacity:0.75;font-weight:500">(5th)</span></div>
+      <div class="den-body">
+        <div class="racer" data-racer="aols-1">
+          <span class="medal">🥇</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="aols-1-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="aols-1-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="aols-1-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="aols-2">
+          <span class="medal">🥈</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="aols-2-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="aols-2-name" data-placeholder="Racer Name"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="aols-2-time" data-placeholder="0.000s"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR code — 8th grid cell; swap #qr-img src once the hosted URL is known -->
+    <div id="qr-block">
+      <div class="den-header">📱 Scan to View</div>
+      <div id="qr-body">
+        <div id="qr-box">
+          <img id="qr-img" src="" alt="QR code" />
+          <div id="qr-placeholder-grid">
+            <!-- Row 1 -->
+            <span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span>
+            <!-- Row 2 -->
+            <span></span><span class="w"></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span>
+            <!-- Row 3 -->
+            <span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span>
+            <!-- Row 4 -->
+            <span class="w"></span><span class="w"></span><span class="w"></span><span></span><span class="w"></span><span class="w"></span><span class="w"></span>
+            <!-- Row 5 -->
+            <span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span>
+            <!-- Row 6 -->
+            <span></span><span class="w"></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span>
+            <!-- Row 7 -->
+            <span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div id="qr-label">Scan to view on your phone</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span id="footer-hint">Press <kbd style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">E</kbd> to edit &nbsp;·&nbsp; F11 fullscreen &nbsp;·&nbsp; Data saved automatically</span>
+  </footer>
+
+  <script>
+    const STORAGE_KEY = 'derby-pack425-2026';
+    const DB_PATH = 'derby-pack425-2026';
+
+    const firebaseConfig = {
+      apiKey:            "YOUR_API_KEY",
+      authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL:       "https://pack425-derby-2026-default-rtdb.firebaseio.com/",
+      projectId:         "YOUR_PROJECT_ID",
+      storageBucket:     "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId:             "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const dbRef = firebase.database().ref(DB_PATH);
+
+    // ── All editable fields ──────────────────────────────────────
+    const fields = [...document.querySelectorAll('[data-key]')];
+    const editBtn = document.getElementById('edit-btn');
+    let editMode = false;
+
+    // ── Load saved data ──────────────────────────────────────────
+    function loadData() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        fields.forEach(el => {
+          const val = saved[el.dataset.key];
+          if (val !== undefined) el.textContent = val;
+        });
+      } catch (e) {}
+    }
+
+    // ── Save a single field ──────────────────────────────────────
+    function saveField(el) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        saved[el.dataset.key] = el.textContent.trim();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+        dbRef.set(saved);   // push full data object to Firebase
+      } catch (e) {}
+    }
+
+    // ── Firebase real-time sync ──────────────────────────────────
+    function startSync() {
+      dbRef.on('value', snapshot => {
+        const data = snapshot.val();
+        if (!data || typeof data !== 'object') return;
+        const active = document.activeElement;
+        fields.forEach(el => {
+          if (el === active) return;  // never interrupt live typing
+          const val = data[el.dataset.key];
+          if (val !== undefined && el.textContent.trim() !== val) {
+            el.textContent = val;
+          }
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+        updateFastest();
+      });
+    }
+
+    // ── Toggle edit mode ─────────────────────────────────────────
+    function setEditMode(on) {
+      editMode = on;
+      document.body.classList.toggle('edit-mode', on);
+      editBtn.classList.toggle('active', on);
+      editBtn.textContent = on ? '✅ Done' : '✏️ Edit';
+      fields.forEach(el => {
+        el.contentEditable = on ? 'true' : 'false';
+      });
+      if (on) {
+        showToast('Edit mode — click any name or time to change it');
+        // Focus first empty name field
+        const first = fields.find(f => f.dataset.key.endsWith('-name') && !f.textContent.trim());
+        if (first) first.focus();
+      } else {
+        showToast('Saved ✓');
+      }
+    }
+
+    editBtn.addEventListener('click', () => setEditMode(!editMode));
+
+    // ── Keyboard shortcut: E to toggle edit ─────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.target.contentEditable === 'true') return; // don't intercept while editing
+      if (e.key === 'e' || e.key === 'E') setEditMode(!editMode);
+      if (e.key === 'Escape' && editMode) setEditMode(false);
+    });
+
+    // ── Field events ─────────────────────────────────────────────
+    fields.forEach((el, i) => {
+      el.contentEditable = 'false';
+
+      // Save on every keystroke + update fastest
+      el.addEventListener('input', () => {
+        saveField(el);
+        updateFastest();
+      });
+
+      // Select all on focus for easy overwrite
+      el.addEventListener('focus', () => {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      });
+
+      // Tab / Shift+Tab navigation between fields
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const dir = e.shiftKey ? -1 : 1;
+          const next = fields[(i + dir + fields.length) % fields.length];
+          next.focus();
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          el.blur();
+        }
+        if (e.key === 'Escape') {
+          el.blur();
+          setEditMode(false);
+        }
+      });
+
+      el.addEventListener('blur', () => saveField(el));
+    });
+
+    // ── Dynamic fastest highlight ────────────────────────────────
+    function parseTime(str) {
+      // Accept formats: 3.456, 3.456s, 3:45.6
+      const n = parseFloat(str.replace(/[^\d.]/g, ''));
+      return isNaN(n) ? Infinity : n;
+    }
+
+    function updateFastest() {
+      const timeFields = fields.filter(f => f.dataset.key.endsWith('-time'));
+      let min = Infinity;
+      let fastestKey = null;
+
+      timeFields.forEach(f => {
+        const t = parseTime(f.textContent);
+        if (t < min) { min = t; fastestKey = f.dataset.key; }
+      });
+
+      // Update all racer rows
+      document.querySelectorAll('.racer').forEach(row => {
+        const key = row.dataset.racer + '-time';
+        row.classList.toggle('fastest', min < Infinity && key === fastestKey);
+      });
+    }
+
+    // ── Toast ────────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ── Init ─────────────────────────────────────────────────────
+    loadData();      // paint immediately from localStorage cache
+    updateFastest(); // highlight fastest from cached data
+    startSync();     // attach Firebase listener — drives all future updates
+
+    // QR code — fill in PAGES_URL after GitHub Pages is set up
+    const PAGES_URL = 'YOUR_GITHUB_PAGES_URL';
+    if (PAGES_URL && PAGES_URL !== 'YOUR_GITHUB_PAGES_URL') {
+      const qrImg = document.getElementById('qr-img');
+      qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?data='
+                + encodeURIComponent(PAGES_URL) + '&size=300x300&margin=10';
+    }
+  </script>
+
+</body>
+</html>
