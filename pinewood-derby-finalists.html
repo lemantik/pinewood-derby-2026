@@ -618,13 +618,13 @@
     const DB_PATH = 'derby-pack425-2026';
 
     const firebaseConfig = {
-      apiKey:            "YOUR_API_KEY",
-      authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-      databaseURL:       "https://pack425-derby-2026-default-rtdb.firebaseio.com/",
-      projectId:         "YOUR_PROJECT_ID",
-      storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId:             "YOUR_APP_ID"
+      apiKey:            "AIzaSyCWO8fcMWKWz6JbBtHCRZQE10M4hqC_eUQ",
+      authDomain:        "pack425-derby-2026.firebaseapp.com",
+      databaseURL:       "https://pack425-derby-2026-default-rtdb.firebaseio.com",
+      projectId:         "pack425-derby-2026",
+      storageBucket:     "pack425-derby-2026.firebasestorage.app",
+      messagingSenderId: "1063242445150",
+      appId:             "1:1063242445150:web:8ca32af17d0bf14bb4dfcf"
     };
     firebase.initializeApp(firebaseConfig);
     const dbRef = firebase.database().ref(DB_PATH);
@@ -781,7 +781,7 @@
     startSync();     // attach Firebase listener — drives all future updates
 
     // QR code — fill in PAGES_URL after GitHub Pages is set up
-    const PAGES_URL = 'YOUR_GITHUB_PAGES_URL';
+    const PAGES_URL = 'https://lemantik.github.io/pinewood-derby-2026/pinewood-derby-finalists.html';
     if (PAGES_URL && PAGES_URL !== 'YOUR_GITHUB_PAGES_URL') {
       const qrImg = document.getElementById('qr-img');
       qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?data='
