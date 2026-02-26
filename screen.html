@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Finalists · Pack 425</title>
+  <title>Big Screen — Finalists · Pack 425</title>
   <!-- Firebase v9 compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -32,7 +32,7 @@
       flex-shrink: 0;
     }
     header h1 {
-      font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+      font-size: clamp(2rem, 4vw, 3.6rem);
       font-weight: 900;
       letter-spacing: 4px;
       text-transform: uppercase;
@@ -41,10 +41,35 @@
       line-height: 1;
     }
     header p {
-      font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+      font-size: clamp(1rem, 1.6vw, 1.3rem);
       color: #8aafd4;
       margin-top: 4px;
       letter-spacing: 2px;
+    }
+
+    /* ── Live indicator ── */
+    #live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #64ffda;
+      margin-top: 5px;
+      opacity: 0.85;
+    }
+    #live-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #64ffda;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
     }
 
     /* ── Corner logos ── */
@@ -86,7 +111,7 @@
 
     .den-header {
       padding: 12px 18px;
-      font-size: clamp(1rem, 1.8vw, 1.45rem);
+      font-size: clamp(1.1rem, 2.2vw, 1.8rem);
       font-weight: 800;
       letter-spacing: 1.5px;
       text-transform: uppercase;
@@ -116,7 +141,7 @@
     }
 
     .medal {
-      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-size: clamp(2.2rem, 3.8vw, 3.2rem);
       line-height: 1;
       flex-shrink: 0;
     }
@@ -142,7 +167,7 @@
     }
 
     .car-num {
-      font-size: clamp(1.1rem, 1.9vw, 1.6rem);
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
       font-weight: 800;
       color: #e8f0fe;
       outline: none;
@@ -150,7 +175,6 @@
       min-width: 22px;
       text-align: center;
       line-height: 1;
-      transition: background 0.15s, box-shadow 0.15s;
     }
 
     .car-num:empty::before {
@@ -158,25 +182,18 @@
       color: #2e4560;
     }
 
-    body.edit-mode .car-num:focus {
-      background: rgba(255,255,255,0.1);
-      box-shadow: 0 0 0 2px rgba(255,215,0,0.5);
-      padding: 2px 4px;
-    }
-
     .racer-info { flex: 1; min-width: 0; }
 
-    /* ── Editable fields ── */
+    /* ── Display fields ── */
     .racer-name,
     .racer-time {
       outline: none;
       border-radius: 6px;
-      transition: background 0.15s, box-shadow 0.15s;
     }
 
     .racer-name {
       display: block;
-      font-size: clamp(1.1rem, 2vw, 1.75rem);
+      font-size: clamp(1.3rem, 2.5vw, 2.2rem);
       font-weight: 700;
       color: #e8f0fe;
       white-space: nowrap;
@@ -187,7 +204,7 @@
     }
 
     .racer-time {
-      font-size: clamp(1.2rem, 2.2vw, 2rem);
+      font-size: clamp(1.6rem, 3vw, 2.8rem);
       font-weight: 800;
       color: #64ffda;
       white-space: nowrap;
@@ -209,23 +226,6 @@
       font-style: normal;
     }
 
-    /* Edit mode — fields are editable */
-    body.edit-mode .racer-name,
-    body.edit-mode .racer-time,
-    body.edit-mode .car-num {
-      cursor: text;
-    }
-    body.edit-mode .racer:hover {
-      background: rgba(255,255,255,0.09);
-    }
-    body.edit-mode .racer-name:focus,
-    body.edit-mode .racer-time:focus {
-      background: rgba(255,255,255,0.1);
-      box-shadow: 0 0 0 2px rgba(255,215,0,0.5);
-      padding: 2px 6px;
-      text-overflow: clip;
-    }
-
     /* ── Fastest badge ── */
     .racer.fastest {
       background: rgba(255, 215, 0, 0.08);
@@ -237,35 +237,13 @@
     }
     .fastest-badge {
       display: none;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 1px;
       color: #FFD700;
       margin-top: 2px;
     }
     .racer.fastest .fastest-badge { display: block; }
-
-    /* ── Toast notification ── */
-    #toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: rgba(255,215,0,0.15);
-      border: 1px solid rgba(255,215,0,0.3);
-      color: #FFD700;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      letter-spacing: 1px;
-      opacity: 0;
-      transition: opacity 0.3s, transform 0.3s;
-      pointer-events: none;
-    }
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
 
     /* ── Footer ── */
     footer {
@@ -276,26 +254,7 @@
       letter-spacing: 1px;
     }
 
-    /* ── Grand Final card ── */
-    #grand-block .den-header {
-      background: #4a1e8a;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    #grand-show-label {
-      font-size: 0.7rem;
-      font-weight: 500;
-      cursor: pointer;
-      text-transform: none;
-      letter-spacing: 0;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* ── Official BSA Cub Scout den colors ── */
+    /* ── BSA den colors ── */
     .lions   .den-header { background: #FFC72C; color: #1a1a1a; }
     .tigers  .den-header { background: #E87722; color: #fff; }
     .wolves1 .den-header { background: #C8102E; color: #fff; }
@@ -312,49 +271,61 @@
     .webelos { border-left: 5px solid #00843D; }
     .aols    { border-left: 5px solid #003F87; }
 
-    /* ── Mobile layout ── */
-    @media (max-width: 700px) {
-      html, body {
-        height: auto;
-        overflow-x: hidden;
-        overflow-y: auto;
-      }
+    /* ── Cell 8: QR / Grand Final panels ── */
+    #cell-8 { border-left: 5px solid #2a4a78; }
 
-      body {
-        height: auto;
-        min-height: 100vh;
-        padding: 68px 10px 24px;
-      }
+    #qr-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
 
-      .corner-logo { height: 32px; }
-      #logo-right { right: 16px; }
+    #grand-content {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
 
-      header h1 { font-size: 1.25rem; letter-spacing: 2px; }
-      header p  { font-size: 0.75rem; letter-spacing: 1px; }
+    #qr-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      gap: 10px;
+    }
 
-      .grid {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto;
-        flex: none;
-      }
+    #qr-box {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      background: #fff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 10px;
+    }
 
-      /* reset desktop column overrides */
-      .grid .den-card:nth-child(5),
-      .grid .den-card:nth-child(6),
-      .grid .den-card:nth-child(7) {
-        grid-column: auto;
-      }
+    #qr-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
 
-      .den-header { font-size: 0.8rem; padding: 7px 10px; letter-spacing: 0.5px; }
-      .den-body   { padding: 8px; gap: 6px; }
-      .racer      { padding: 7px 8px; gap: 6px; flex-wrap: wrap; }
-      .medal      { font-size: 1.2rem; }
-      .car-badge  { min-width: 32px; padding: 3px 5px; }
-      .racer-info { flex: 1; min-width: 0; }
-      .racer-name { font-size: 0.85rem; }
-      .racer-time { width: 100%; text-align: right; font-size: 1.05rem; min-width: unset; }
-      .fastest-badge { font-size: 0.62rem; }
-      footer { display: none; }
+    #qr-label {
+      font-size: clamp(0.8rem, 1.3vw, 1.1rem);
+      color: #4a6fa0;
+      letter-spacing: 0.5px;
+      text-align: center;
+      line-height: 1.4;
+      flex-shrink: 0;
     }
 
   </style>
@@ -363,11 +334,11 @@
 
   <img id="logo-left"  class="corner-logo" src="assets/cubscouts200.png"             alt="Cub Scouts" />
   <img id="logo-right" class="corner-logo" src="assets/Chief Seattle Council BSA.png" alt="Chief Seattle Council BSA" />
-  <div id="toast"></div>
 
   <header>
     <h1>🏁 Grand Final &mdash; Finalists</h1>
     <p>Pinewood Derby &nbsp;·&nbsp; Pack 425 &nbsp;·&nbsp; 2026</p>
+    <div id="live-badge">LIVE</div>
   </header>
 
   <div class="grid">
@@ -547,49 +518,60 @@
       </div>
     </div>
 
-    <!-- Grand Final — 8th grid cell -->
-    <div id="grand-block" class="den-card" style="border-left: 5px solid #7c3aed">
-      <div class="den-header">
-        <span>🏆 Grand Final</span>
-        <label id="grand-show-label">
-          <input type="checkbox" id="grand-show-cb"> Show on screen
-        </label>
-      </div>
-      <div class="den-body">
-        <div class="racer" data-racer="grand-1">
-          <span class="medal">🥇</span>
-          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-1-car" data-placeholder="--"></span></div>
-          <div class="racer-info">
-            <span class="racer-name" data-key="grand-1-name" data-placeholder="1st place"></span>
+    <!-- Cell 8: QR code (default) ↔ Grand Final (when enabled) -->
+    <div id="cell-8" class="den-card">
+
+      <!-- QR panel — shown by default -->
+      <div id="qr-content">
+        <div class="den-header" style="background:#0d1e38; color:#4a7ab8">📱 Scan to View</div>
+        <div id="qr-body">
+          <div id="qr-box">
+            <img id="qr-img" src="" alt="QR code" />
           </div>
-          <span class="racer-time" data-key="grand-1-time" data-placeholder="0.000s"></span>
-        </div>
-        <div class="racer" data-racer="grand-2">
-          <span class="medal">🥈</span>
-          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-2-car" data-placeholder="--"></span></div>
-          <div class="racer-info">
-            <span class="racer-name" data-key="grand-2-name" data-placeholder="2nd place"></span>
-          </div>
-          <span class="racer-time" data-key="grand-2-time" data-placeholder="0.000s"></span>
-        </div>
-        <div class="racer" data-racer="grand-3">
-          <span class="medal">🥉</span>
-          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-3-car" data-placeholder="--"></span></div>
-          <div class="racer-info">
-            <span class="racer-name" data-key="grand-3-name" data-placeholder="3rd place"></span>
-          </div>
-          <span class="racer-time" data-key="grand-3-time" data-placeholder="0.000s"></span>
+          <div id="qr-label">Scan to view on your phone</div>
         </div>
       </div>
+
+      <!-- Grand Final panel — shown when admin checks "Show on screen" -->
+      <div id="grand-content">
+        <div class="den-header" style="background:#4a1e8a; color:#fff">🏆 Grand Final</div>
+        <div class="den-body">
+          <div class="racer" data-racer="grand-1">
+            <span class="medal">🥇</span>
+            <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-1-car" data-placeholder="--"></span></div>
+            <div class="racer-info">
+              <span class="racer-name" data-key="grand-1-name" data-placeholder="1st place"></span>
+            </div>
+            <span class="racer-time" data-key="grand-1-time" data-placeholder="0.000s"></span>
+          </div>
+          <div class="racer" data-racer="grand-2">
+            <span class="medal">🥈</span>
+            <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-2-car" data-placeholder="--"></span></div>
+            <div class="racer-info">
+              <span class="racer-name" data-key="grand-2-name" data-placeholder="2nd place"></span>
+            </div>
+            <span class="racer-time" data-key="grand-2-time" data-placeholder="0.000s"></span>
+          </div>
+          <div class="racer" data-racer="grand-3">
+            <span class="medal">🥉</span>
+            <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-3-car" data-placeholder="--"></span></div>
+            <div class="racer-info">
+              <span class="racer-name" data-key="grand-3-name" data-placeholder="3rd place"></span>
+            </div>
+            <span class="racer-time" data-key="grand-3-time" data-placeholder="0.000s"></span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
   </div>
 
-  <footer>F11 fullscreen &nbsp;·&nbsp; Data saved automatically</footer>
+  <footer>Pack 425 &nbsp;·&nbsp; Pinewood Derby 2026 &nbsp;·&nbsp; F11 fullscreen</footer>
 
   <script>
     const STORAGE_KEY = 'derby-pack425-2026';
-    const DB_PATH = 'derby-pack425-2026';
+    const DB_PATH     = 'derby-pack425-2026';
 
     const firebaseConfig = {
       apiKey:            "AIzaSyCWO8fcMWKWz6JbBtHCRZQE10M4hqC_eUQ",
@@ -603,11 +585,16 @@
     firebase.initializeApp(firebaseConfig);
     const dbRef = firebase.database().ref(DB_PATH);
 
-    // ── All editable fields ──────────────────────────────────────
+    // ── All display fields ───────────────────────────────────────
     const fields = [...document.querySelectorAll('[data-key]')];
-    const cb = document.getElementById('grand-show-cb');
 
-    // ── Load saved data ──────────────────────────────────────────
+    // ── Grand Final panel toggle ─────────────────────────────────
+    function applyGrandFinalState(showGF) {
+      document.getElementById('qr-content').style.display   = showGF ? 'none'  : 'flex';
+      document.getElementById('grand-content').style.display = showGF ? 'flex'  : 'none';
+    }
+
+    // ── Load cached data instantly ───────────────────────────────
     function loadData() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
@@ -615,17 +602,7 @@
           const val = saved[el.dataset.key];
           if (val !== undefined) el.textContent = val;
         });
-        if (saved.showGrandFinal !== undefined) cb.checked = !!saved.showGrandFinal;
-      } catch (e) {}
-    }
-
-    // ── Save a single field ──────────────────────────────────────
-    function saveField(el) {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        saved[el.dataset.key] = el.textContent.trim();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-        dbRef.set(saved);
+        applyGrandFinalState(!!saved.showGrandFinal);
       } catch (e) {}
     }
 
@@ -634,66 +611,19 @@
       dbRef.on('value', snapshot => {
         const data = snapshot.val();
         if (!data || typeof data !== 'object') return;
-        const active = document.activeElement;
         fields.forEach(el => {
-          if (el === active) return;  // never interrupt live typing
           const val = data[el.dataset.key];
           if (val !== undefined && el.textContent.trim() !== val) {
             el.textContent = val;
           }
         });
-        if (data.showGrandFinal !== undefined) cb.checked = !!data.showGrandFinal;
+        applyGrandFinalState(!!data.showGrandFinal);
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
         updateFastest();
       });
     }
 
-    // ── Grand Final checkbox ─────────────────────────────────────
-    cb.addEventListener('change', () => {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-        saved.showGrandFinal = cb.checked;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-        dbRef.set(saved);
-      } catch (e) {}
-    });
-
-    // ── Field events ─────────────────────────────────────────────
-    fields.forEach((el, i) => {
-      el.contentEditable = 'true';
-
-      el.addEventListener('input', () => {
-        saveField(el);
-        updateFastest();
-      });
-
-      // Select all on focus for easy overwrite
-      el.addEventListener('focus', () => {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-      });
-
-      // Tab / Shift+Tab navigation between fields
-      el.addEventListener('keydown', e => {
-        if (e.key === 'Tab') {
-          e.preventDefault();
-          const dir = e.shiftKey ? -1 : 1;
-          const next = fields[(i + dir + fields.length) % fields.length];
-          next.focus();
-        }
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          el.blur();
-        }
-      });
-
-      el.addEventListener('blur', () => saveField(el));
-    });
-
-    // ── Dynamic fastest highlight (dens only, not Grand Final) ───
+    // ── Fastest highlight (dens only, not Grand Final) ───────────
     function parseTime(str) {
       const n = parseFloat(str.replace(/[^\d.]/g, ''));
       return isNaN(n) ? Infinity : n;
@@ -703,8 +633,7 @@
       const timeFields = fields.filter(f =>
         f.dataset.key.endsWith('-time') && !f.dataset.key.startsWith('grand-')
       );
-      let min = Infinity;
-      let fastestKey = null;
+      let min = Infinity, fastestKey = null;
       timeFields.forEach(f => {
         const t = parseTime(f.textContent);
         if (t < min) { min = t; fastestKey = f.dataset.key; }
@@ -715,21 +644,16 @@
       });
     }
 
-    // ── Toast ────────────────────────────────────────────────────
-    let toastTimer;
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
-    }
-
     // ── Init ─────────────────────────────────────────────────────
-    document.body.classList.add('edit-mode');
     loadData();
     updateFastest();
     startSync();
+
+    // QR code
+    const PAGES_URL = 'https://bit.ly/pinewood-2026';
+    document.getElementById('qr-img').src =
+      'https://api.qrserver.com/v1/create-qr-code/?data='
+      + encodeURIComponent(PAGES_URL) + '&size=300x300&margin=10';
   </script>
 
 </body>

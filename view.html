@@ -596,6 +596,42 @@
 
   </div>
 
+  <!-- Grand Final section — shown when admin enables "Show on screen" -->
+  <div id="grand-section" style="display:none">
+    <div class="den-card" style="border-left:5px solid #7c3aed; margin-top:12px">
+      <div class="den-header" style="background:#4a1e8a; color:#fff">🏆 Grand Final</div>
+      <div class="den-body">
+        <div class="racer" data-racer="grand-1">
+          <span class="medal">🥇</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-1-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="grand-1-name" data-placeholder="1st place"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="grand-1-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="grand-2">
+          <span class="medal">🥈</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-2-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="grand-2-name" data-placeholder="2nd place"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="grand-2-time" data-placeholder="0.000s"></span>
+        </div>
+        <div class="racer" data-racer="grand-3">
+          <span class="medal">🥉</span>
+          <div class="car-badge"><span class="car-hash">#</span><span class="car-num" data-key="grand-3-car" data-placeholder="--"></span></div>
+          <div class="racer-info">
+            <span class="racer-name" data-key="grand-3-name" data-placeholder="3rd place"></span>
+            <span class="fastest-badge">⚡ FASTEST</span>
+          </div>
+          <span class="racer-time" data-key="grand-3-time" data-placeholder="0.000s"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer>Pack 425 &nbsp;·&nbsp; Pinewood Derby 2026</footer>
 
   <script>
@@ -625,6 +661,8 @@
           const val = saved[el.dataset.key];
           if (val !== undefined) el.textContent = val;
         });
+        document.getElementById('grand-section').style.display =
+          saved.showGrandFinal ? 'block' : 'none';
       } catch (e) {}
     }
 
@@ -639,19 +677,23 @@
             el.textContent = val;
           }
         });
+        document.getElementById('grand-section').style.display =
+          data.showGrandFinal ? 'block' : 'none';
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
         updateFastest();
       });
     }
 
-    // ── Fastest highlight ────────────────────────────────────────
+    // ── Fastest highlight (dens only, not Grand Final) ───────────
     function parseTime(str) {
       const n = parseFloat(str.replace(/[^\d.]/g, ''));
       return isNaN(n) ? Infinity : n;
     }
 
     function updateFastest() {
-      const timeFields = fields.filter(f => f.dataset.key.endsWith('-time'));
+      const timeFields = fields.filter(f =>
+        f.dataset.key.endsWith('-time') && !f.dataset.key.startsWith('grand-')
+      );
       let min = Infinity, fastestKey = null;
       timeFields.forEach(f => {
         const t = parseTime(f.textContent);
