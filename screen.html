@@ -132,6 +132,7 @@
     .racer {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 12px;
       background: rgba(255,255,255,0.05);
       border-radius: 10px;
@@ -211,7 +212,8 @@
       font-variant-numeric: tabular-nums;
       letter-spacing: 1px;
       text-align: right;
-      min-width: 70px;
+      width: 100%;
+      min-width: unset;
     }
 
     .racer-name:empty::before {
